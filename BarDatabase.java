@@ -44,42 +44,62 @@ public class BarDatabase  {
     // HBase configuration 
     private final Configuration config;
 
-    // Creates a rowkey from date and stock name
+    /**
+     *     Creates a rowkey from date and stock name
+     */
     private byte[] makeKey(String date, String stock) {
         // Optimized so that stocks are close to each other lexicographically
 	return (stock + date).getBytes();
     }
-
+    
+    /**
+     *    Creates a new importer object scoped to this DAO which can 
+     *    accept text input and flush to the underlying HBase instance.
+     *    (LineImporter defined below)
+     */
     public DataCallback GetDataImporter(String symbol) {
 	return new LineImporter(symbol);
     }
-    
+
+    /**
+     *    Gets a single row given the date and stock symbol
+     */
     public String[] GetRow(String date, String symbol) throws IOException {
        	try (Connection conn = ConnectionFactory.createConnection(config)){
-       	     Table table = conn.getTable(TableName.valueOf(TABLE_NAME));
-	       	byte[] key = makeKey(date, symbol);
-		Get get = new Get(key);
-	       	Result r = table.get(get);
-	       	if ( r.isEmpty() ) return null;
-	       	String[] retval = new String[6];
-	       	retval[0] = new String(r.getRow());  // For validation
-	       	retval[1] = new String(r.getValue(COLUMN_FAMILY, COL_OPEN));
-	       	retval[2] = new String(r.getValue(COLUMN_FAMILY, COL_HIGH));
-	       	retval[3] = new String(r.getValue(COLUMN_FAMILY, COL_LOW));
-	       	retval[4] = new String(r.getValue(COLUMN_FAMILY, COL_CLOSE));
-	       	retval[5] = new String(r.getValue(COLUMN_FAMILY, COL_VOLUME));
-	       	return retval;
-	    }
+	    // Get the table 
+       	    Table table = conn.getTable(TableName.valueOf(TABLE_NAME));
+	    // Get the rowkey
+	    byte[] key = makeKey(date, symbol);
+	    // Construct a "getter". 
+	    Get get = new Get(key);
+	    // Get the result by passing the getter to the table
+	    Result r = table.get(get);
+	    // return the results
+	    if ( r.isEmpty() ) return null;
+	    String[] retval = new String[6];
+	    retval[0] = new String(r.getRow());  // For validation
+	    retval[1] = new String(r.getValue(COLUMN_FAMILY, COL_OPEN));
+	    retval[2] = new String(r.getValue(COLUMN_FAMILY, COL_HIGH));
+	    retval[3] = new String(r.getValue(COLUMN_FAMILY, COL_LOW));
+	    retval[4] = new String(r.getValue(COLUMN_FAMILY, COL_CLOSE));
+	    retval[5] = new String(r.getValue(COLUMN_FAMILY, COL_VOLUME));
+	    return retval;
+	}
     }
 
+    /**
+     *    Gets a single cell given the date and stock symbol and column ID
+     */
     public String GetCell(String date, String symbol, byte[] column)
 	throws IOException {
 	try (Connection conn = ConnectionFactory.createConnection(config)){
-	     Table table = conn.getTable(TableName.valueOf(TABLE_NAME));
-       		Get get = new Get(makeKey(date, symbol));
-       		Result r = table.get(get);
-       		if ( r.isEmpty() ) return null;
-       		return new String(r.getValue(COLUMN_FAMILY, column));
+	    Table table = conn.getTable(TableName.valueOf(TABLE_NAME));
+       	    Get get = new Get(makeKey(date, symbol));
+	    get.addColumn(COLUMN_FAMILY, column);
+       	    Result r = table.get(get);
+       	    if ( r.isEmpty() ) return null;
+	    // Gets the value of the first (and only) column
+	    return new String(r.value());
        	}
     }
 
