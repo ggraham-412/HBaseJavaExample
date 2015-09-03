@@ -39,7 +39,7 @@ whatever user is running the HBase daemon.
 To start HBase, issue the command
 
 ```
-bin/start-hbase.sh.
+bin/start-hbase.sh
 ```
 
 ### Compiling the Code
