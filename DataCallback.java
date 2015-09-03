@@ -5,5 +5,5 @@ import java.io.IOException;
  *    (AutoCloseable so that it can be used in a try() {} expression)
  */
 public interface DataCallback extends AutoCloseable {
-	void ProcessData(String record) throws IOException;
+    void ProcessData(String record) throws IOException;
 }
