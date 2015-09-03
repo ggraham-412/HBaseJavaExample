@@ -16,6 +16,7 @@ public class TestHBase {
      */
     private static void ImportCSVData(BarDatabase db,
                                       String filename, String symbol) {
+	System.out.println("Loading data for " + symbol + " from " + filename);
         try (LineReader reader = 
                     new LineReader(filename, db.GetDataImporter(symbol))) {
             reader.ProcessData();
