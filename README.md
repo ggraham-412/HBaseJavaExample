@@ -36,7 +36,11 @@ it is not necessary to create the /data/hbase and the /data/zookeeper folders;
 HBase will do that for you.  However, the /data folder should be writable by
 whatever user is running the HBase daemon.
 
-To start HBase, issue the command bin/start-hbase.sh.
+To start HBase, issue the command
+
+```
+bin/start-hbase.sh.
+```
 
 ### Compiling the Code
 
